@@ -84,7 +84,8 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
             { id: 'mrinalprakash', name: 'Mrinal Prakash', pass: 'mrinalprakash' },
             { id: 'akshita', name: 'Akshita', pass: 'akshita' },
             { id: 'harshdevjha', name: 'Harsh Dev Jha', pass: 'harshdevjha' },
-            { id: 'amanchapadiya', name: 'Aman Chapadiya', pass: 'amanchapadiya' }
+            { id: 'amanchapadiya', name: 'Aman Chapadiya', pass: 'amanchapadiya' },
+            { id: 'manas', name: 'Manas', pass: 'manas' }
         ];
 
         defaultAdmins.forEach(admin => {
