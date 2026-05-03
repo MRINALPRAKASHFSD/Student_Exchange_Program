@@ -79,13 +79,22 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Ensure default admin exists
-        db.get('SELECT id FROM users WHERE role = ?', ['admin'], (err, row) => {
-            if (!row) {
-                bcrypt.hash('admin123', 10, (err, hash) => {
-                    db.run('INSERT INTO users (id, name, password, role) VALUES (?, ?, ?, ?)', ['ADMIN123', 'Administrator', hash, 'admin']);
-                });
-            }
+        // Ensure default admins exist
+        const defaultAdmins = [
+            { id: 'mrinalprakash', name: 'Mrinal Prakash', pass: 'mrinalprakash' },
+            { id: 'akshita', name: 'Akshita', pass: 'akshita' },
+            { id: 'harshdevjha', name: 'Harsh Dev Jha', pass: 'harshdevjha' },
+            { id: 'amanchapadiya', name: 'Aman Chapadiya', pass: 'amanchapadiya' }
+        ];
+
+        defaultAdmins.forEach(admin => {
+            db.get('SELECT id FROM users WHERE id = ?', [admin.id], (err, row) => {
+                if (!row) {
+                    bcrypt.hash(admin.pass, 10, (err, hash) => {
+                        db.run('INSERT INTO users (id, name, password, role) VALUES (?, ?, ?, ?)', [admin.id, admin.name, hash, 'admin']);
+                    });
+                }
+            });
         });
     }
 });
