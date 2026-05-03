@@ -317,11 +317,48 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 const data = await res.json();
                 container.innerHTML = `
-                    <p style="color:var(--success); margin-bottom:1rem;">Your certificate is ready!</p>
-                    <a href="/uploads/${data.filename}" download class="btn btn-primary" target="_blank" style="text-decoration:none;">Download Certificate</a>
+                    <div style="background: rgba(0, 168, 255, 0.1); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(0, 168, 255, 0.3);">
+                        <p style="color:var(--success); font-size: 1.1rem; font-weight: bold; margin-bottom:1rem;">🎉 Your certificate is ready!</p>
+                        <a href="/uploads/${data.filename}" download class="btn btn-primary" target="_blank" style="text-decoration:none; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; padding: 0.8rem 1.5rem;">
+                            <i data-lucide="download" style="width: 18px; height: 18px;"></i> Download Certificate
+                        </a>
+                    </div>
                 `;
+                if (window.lucide) window.lucide.createIcons();
             } else {
-                container.innerHTML = `<p style="color:var(--text-light);">No certificate available yet. Complete the program!</p>`;
+                // Timer Logic: 5 days from program start (May 4 -> May 9)
+                const unlockDate = new Date('May 9, 2026 17:00:00').getTime();
+                
+                const updateTimer = () => {
+                    const now = new Date().getTime();
+                    const distance = unlockDate - now;
+
+                    if (distance < 0) {
+                        container.innerHTML = `<p style="color:var(--text-light);">Certificates are being processed. Check back soon!</p>`;
+                        return;
+                    }
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    container.innerHTML = `
+                        <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; border: 1px solid var(--glass-border);">
+                            <p style="color:var(--text-light); margin-bottom: 0.5rem; font-size: 0.9rem;">Certificates unlock in:</p>
+                            <div style="display: flex; justify-content: center; gap: 1rem; font-family: monospace; font-size: 1.5rem; color: var(--primary); font-weight: bold;">
+                                <div>${days}d</div>
+                                <div>${hours.toString().padStart(2, '0')}h</div>
+                                <div>${minutes.toString().padStart(2, '0')}m</div>
+                                <div>${seconds.toString().padStart(2, '0')}s</div>
+                            </div>
+                            <p style="color:var(--text-light); font-size: 0.8rem; margin-top: 0.5rem;">Attend all 5 days to be eligible.</p>
+                        </div>
+                    `;
+                };
+                
+                updateTimer();
+                setInterval(updateTimer, 1000);
             }
         } catch (e) {
             document.getElementById('certificate-status').innerHTML = `<p style="color:var(--error);">Error checking certificate status.</p>`;
