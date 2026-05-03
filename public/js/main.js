@@ -79,6 +79,45 @@ document.addEventListener('DOMContentLoaded', () => {
         element.className = `message ${isSuccess ? 'success' : 'error'}`;
     };
 
+    // Smoother Toast Notification System
+    const showToast = (message, type = 'success') => {
+        let toast = document.getElementById('toast-notification');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast-notification';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: var(--primary);
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+        }
+        
+        toast.style.background = type === 'error' ? 'var(--error)' : 'var(--primary)';
+        toast.textContent = message;
+        
+        // Show
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Hide
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+        }, 3000);
+    };
+
     // Form Submission: Register
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -194,6 +233,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${r.comments}</td>
                     </tr>
                 `).join('');
+
+                // Render Users
+                document.getElementById('admin-users-body').innerHTML = data.users.map(u => `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td>${u.name}</td>
+                        <td>${u.role}</td>
+                    </tr>
+                `).join('');
+
+                // Render Activities
+                document.getElementById('admin-activities-body').innerHTML = data.activities.map(a => `
+                    <tr>
+                        <td>${new Date(a.timestamp).toLocaleString()}</td>
+                        <td>${a.name} (${a.student_id})</td>
+                        <td>${a.activity_type}</td>
+                    </tr>
+                `).join('');
             }
         } catch (e) {
             console.error('Failed to load admin dashboard', e);
@@ -254,9 +311,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify({ date, status })
             });
-            alert('Attendance submitted!');
+            showToast('Attendance successfully submitted!');
             e.target.reset();
-        } catch(err) { alert('Failed to submit attendance'); }
+        } catch(err) { showToast('Failed to submit attendance', 'error'); }
     });
 
     document.getElementById('photo-form')?.addEventListener('submit', async (e) => {
@@ -270,9 +327,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: formData
             });
-            alert('Photo uploaded!');
+            showToast('Photograph uploaded securely!');
             e.target.reset();
-        } catch(err) { alert('Failed to upload photo'); }
+        } catch(err) { showToast('Failed to upload photo', 'error'); }
     });
 
     document.getElementById('rating-form')?.addEventListener('submit', async (e) => {
@@ -286,9 +343,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify({ session_name, rating, comments })
             });
-            alert('Rating submitted!');
+            showToast('Session rating submitted. Thank you!');
             e.target.reset();
-        } catch(err) { alert('Failed to submit rating'); }
+        } catch(err) { showToast('Failed to submit rating', 'error'); }
     });
 
     // Initial check
