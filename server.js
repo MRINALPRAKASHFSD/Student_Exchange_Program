@@ -7,10 +7,16 @@ const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
 
+const isVercel = process.env.VERCEL === '1';
+const uploadDir = isVercel ? '/tmp/uploads/' : 'public/uploads/';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads/');
+        cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
@@ -26,9 +32,13 @@ const SECRET_KEY = 'supersecret_exchange_key';
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+if (isVercel) {
+    app.use('/uploads', express.static('/tmp/uploads'));
+}
 
 // Database setup
-const db = new sqlite3.Database('./database.sqlite', (err) => {
+const dbPath = isVercel ? '/tmp/database.sqlite' : './database.sqlite';
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Database opening error: ', err);
     } else {
@@ -294,6 +304,10 @@ app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+if (!isVercel) {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
