@@ -1,5 +1,23 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+let sqlite3;
+try {
+    sqlite3 = require('sqlite3').verbose();
+} catch (e) {
+    console.error("Failed to load sqlite3:", e);
+    // Dummy object to prevent crashing later in the code
+    sqlite3 = {
+        Database: class {
+            constructor(path, cb) {
+                this.isMock = true;
+                if (cb) setTimeout(() => cb(new Error("SQLite3 failed to load native bindings: " + e.message)), 0);
+            }
+            serialize() {}
+            run() {}
+            get() {}
+            all() {}
+        }
+    };
+}
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
