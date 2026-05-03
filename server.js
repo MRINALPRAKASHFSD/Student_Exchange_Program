@@ -43,68 +43,65 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error('Database opening error: ', err);
     } else {
         console.log('Connected to the SQLite database.');
-        db.run(`CREATE TABLE IF NOT EXISTS users (
-            id TEXT PRIMARY KEY,
-            name TEXT,
-            password TEXT,
-            role TEXT DEFAULT 'student'
-        )`);
-        
-        db.run(`CREATE TABLE IF NOT EXISTS activities (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
-            activity TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        db.run(`CREATE TABLE IF NOT EXISTS attendance (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
-            date TEXT,
-            status TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        db.run(`CREATE TABLE IF NOT EXISTS photos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
-            filename TEXT,
-            description TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        db.run(`CREATE TABLE IF NOT EXISTS ratings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
-            session_name TEXT,
-            rating INTEGER,
-            comments TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-        
-        db.run(`CREATE TABLE IF NOT EXISTS certificates (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
-            filename TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
+        db.serialize(() => {
+            db.run(`CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                name TEXT,
+                password TEXT,
+                role TEXT DEFAULT 'student'
+            )`);
+            
+            db.run(`CREATE TABLE IF NOT EXISTS activities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                activity TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
+            
+            db.run(`CREATE TABLE IF NOT EXISTS attendance (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                date TEXT,
+                status TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
+            
+            db.run(`CREATE TABLE IF NOT EXISTS photos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                filename TEXT,
+                description TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
+            
+            db.run(`CREATE TABLE IF NOT EXISTS ratings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                session_name TEXT,
+                rating INTEGER,
+                comments TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
+            
+            db.run(`CREATE TABLE IF NOT EXISTS certificates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                filename TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
 
-        // Ensure default admins exist
-        const defaultAdmins = [
-            { id: 'mrinalprakash', name: 'Mrinal Prakash', pass: 'mrinalprakash' },
-            { id: 'akshita', name: 'Akshita', pass: 'akshita' },
-            { id: 'harshdevjha', name: 'Harsh Dev Jha', pass: 'harshdevjha' },
-            { id: 'amanchapadiya', name: 'Aman Chapadiya', pass: 'amanchapadiya' },
-            { id: 'manas', name: 'Manas', pass: 'manas' }
-        ];
+            // Ensure default admins exist synchronously to prevent race conditions on cold start
+            const defaultAdmins = [
+                { id: 'mrinalprakash', name: 'Mrinal Prakash', pass: 'mrinalprakash' },
+                { id: 'akshita', name: 'Akshita', pass: 'akshita' },
+                { id: 'harshdevjha', name: 'Harsh Dev Jha', pass: 'harshdevjha' },
+                { id: 'amanchapadiya', name: 'Aman Chapadiya', pass: 'amanchapadiya' },
+                { id: 'manas', name: 'Manas', pass: 'manas' }
+            ];
 
-        defaultAdmins.forEach(admin => {
-            db.get('SELECT id FROM users WHERE id = ?', [admin.id], (err, row) => {
-                if (!row) {
-                    bcrypt.hash(admin.pass, 10, (err, hash) => {
-                        db.run('INSERT INTO users (id, name, password, role) VALUES (?, ?, ?, ?)', [admin.id, admin.name, hash, 'admin']);
-                    });
-                }
+            defaultAdmins.forEach(admin => {
+                const hash = bcrypt.hashSync(admin.pass, 10);
+                db.run('INSERT OR IGNORE INTO users (id, name, password, role) VALUES (?, ?, ?, ?)', [admin.id, admin.name, hash, 'admin']);
             });
         });
     }
