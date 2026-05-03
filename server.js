@@ -71,6 +71,13 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
             comments TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
+        
+        db.run(`CREATE TABLE IF NOT EXISTS certificates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            filename TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
 
         // Ensure default admin exists
         db.get('SELECT id FROM users WHERE role = ?', ['admin'], (err, row) => {
@@ -249,11 +256,34 @@ app.get('/api/admin/dashboard', authenticateAdmin, (req, res) => {
     });
 });
 
-// Fallback to index.html for SPA-like behavior if needed
-app.use((req, res) => {
+// Admin upload certificate
+app.post('/api/admin/certificate/:userId', authenticateAdmin, upload.single('certificate'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No certificate file provided' });
+    const { userId } = req.params;
+    
+    // Replace if exists
+    db.run('DELETE FROM certificates WHERE user_id = ?', [userId], (err) => {
+        db.run('INSERT INTO certificates (user_id, filename) VALUES (?, ?)', [userId, req.file.filename], function(err) {
+            if (err) return res.status(500).json({ error: 'Database error' });
+            res.json({ message: 'Certificate uploaded successfully', filename: req.file.filename });
+        });
+    });
+});
+
+// Student get certificate
+app.get('/api/user/certificate', authenticateToken, (req, res) => {
+    db.get('SELECT filename FROM certificates WHERE user_id = ?', [req.user.id], (err, row) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (!row) return res.status(404).json({ error: 'Certificate not found' });
+        res.json({ filename: row.filename });
+    });
+});
+
+// Fallback for SPA routing
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });

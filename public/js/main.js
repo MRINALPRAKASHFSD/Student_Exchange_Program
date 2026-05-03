@@ -258,6 +258,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${u.id}</td>
                         <td>${u.name}</td>
                         <td>${u.role}</td>
+                        <td>
+                            ${u.role === 'student' ? `
+                                <label class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem; cursor: pointer;">
+                                    Upload PDF
+                                    <input type="file" accept="application/pdf,image/*" style="display:none;" onchange="uploadCertificate(event, '${u.id}')">
+                                </label>
+                            ` : '-'}
+                        </td>
                     </tr>
                 `).join('');
 
@@ -272,6 +280,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (e) {
             console.error('Failed to load admin dashboard', e);
+        }
+    };
+
+    window.uploadCertificate = async (event, userId) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('certificate', file);
+
+        try {
+            const res = await fetch(`${API_URL}/admin/certificate/${userId}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showToast('Certificate uploaded successfully!');
+            } else {
+                showToast(data.error || 'Failed to upload certificate', 'error');
+            }
+        } catch (e) {
+            console.error('Error uploading cert:', e);
+            showToast('Error uploading certificate', 'error');
+        }
+    };
+
+    const loadStudentCertificate = async () => {
+        try {
+            const res = await fetch(`${API_URL}/user/certificate`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            const container = document.getElementById('certificate-status');
+            if (res.ok) {
+                const data = await res.json();
+                container.innerHTML = `
+                    <p style="color:var(--success); margin-bottom:1rem;">Your certificate is ready!</p>
+                    <a href="/uploads/${data.filename}" download class="btn btn-primary" target="_blank" style="text-decoration:none;">Download Certificate</a>
+                `;
+            } else {
+                container.innerHTML = `<p style="color:var(--text-light);">No certificate available yet. Complete the program!</p>`;
+            }
+        } catch (e) {
+            document.getElementById('certificate-status').innerHTML = `<p style="color:var(--error);">Error checking certificate status.</p>`;
         }
     };
 
@@ -300,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 adminDashboard.classList.add('hidden');
                 dashboardSection.classList.remove('hidden');
                 document.getElementById('dashboard-welcome').textContent = `Welcome to SOET Exchange, ${user.name}`;
+                loadStudentCertificate();
             }
             
             // Update navbar
