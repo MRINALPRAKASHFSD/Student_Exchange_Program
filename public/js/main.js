@@ -152,7 +152,62 @@ document.addEventListener('DOMContentLoaded', () => {
         checkAuthStatus();
     });
 
+    // Fetch Admin Data
+    const loadAdminDashboard = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/admin/dashboard`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('stat-students').textContent = data.users.filter(u => u.role !== 'admin').length;
+                document.getElementById('stat-attendance').textContent = data.attendance.length;
+                document.getElementById('stat-photos').textContent = data.photos.length;
+                document.getElementById('stat-ratings').textContent = data.ratings.length;
+
+                // Render Attendance
+                document.getElementById('admin-attendance-body').innerHTML = data.attendance.map(a => `
+                    <tr>
+                        <td>${a.name}</td>
+                        <td>${a.student_id}</td>
+                        <td>${a.date}</td>
+                        <td>${a.status}</td>
+                    </tr>
+                `).join('');
+
+                // Render Photos
+                document.getElementById('admin-photos-grid').innerHTML = data.photos.map(p => `
+                    <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; width: 150px;">
+                        <img src="/uploads/${p.filename}" style="width:100%; border-radius:4px; margin-bottom:0.5rem;">
+                        <div style="font-size:0.8rem; color:#b0c4de;">${p.name}</div>
+                        <div style="font-size:0.8rem;">${p.description || 'No desc'}</div>
+                    </div>
+                `).join('');
+
+                // Render Ratings
+                document.getElementById('admin-ratings-body').innerHTML = data.ratings.map(r => `
+                    <tr>
+                        <td>${r.name}</td>
+                        <td>${r.session_name}</td>
+                        <td>${r.rating}/5</td>
+                        <td>${r.comments}</td>
+                    </tr>
+                `).join('');
+            }
+        } catch (e) {
+            console.error('Failed to load admin dashboard', e);
+        }
+    };
+
     // Check Auth Status & Toggle UI
+    const adminDashboard = document.getElementById('admin-dashboard');
+    document.getElementById('admin-logout-btn')?.addEventListener('click', () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        checkAuthStatus();
+    });
+
     const checkAuthStatus = () => {
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user'));
@@ -161,8 +216,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // User is logged in
             heroSection.classList.add('hidden');
             featuresSection.classList.add('hidden');
-            dashboardSection.classList.remove('hidden');
-            document.getElementById('dashboard-welcome').textContent = `Welcome to SOET Exchange, ${user.name}`;
+            
+            if (user.role === 'admin') {
+                dashboardSection.classList.add('hidden');
+                adminDashboard.classList.remove('hidden');
+                loadAdminDashboard();
+            } else {
+                adminDashboard.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                document.getElementById('dashboard-welcome').textContent = `Welcome to SOET Exchange, ${user.name}`;
+            }
             
             // Update navbar
             loginBtn.classList.add('hidden');
@@ -172,12 +235,61 @@ document.addEventListener('DOMContentLoaded', () => {
             heroSection.classList.remove('hidden');
             featuresSection.classList.remove('hidden');
             dashboardSection.classList.add('hidden');
+            adminDashboard.classList.add('hidden');
             
             // Update navbar
             loginBtn.classList.remove('hidden');
             registerBtn.classList.remove('hidden');
         }
     };
+
+    // Form submission handlers for new Student actions
+    document.getElementById('attendance-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const date = document.getElementById('att-date').value;
+        const status = document.getElementById('att-status').value;
+        try {
+            await fetch(`${API_URL}/attendance`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ date, status })
+            });
+            alert('Attendance submitted!');
+            e.target.reset();
+        } catch(err) { alert('Failed to submit attendance'); }
+    });
+
+    document.getElementById('photo-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('photo', document.getElementById('photo-file').files[0]);
+        formData.append('description', document.getElementById('photo-desc').value);
+        try {
+            await fetch(`${API_URL}/upload-photo`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: formData
+            });
+            alert('Photo uploaded!');
+            e.target.reset();
+        } catch(err) { alert('Failed to upload photo'); }
+    });
+
+    document.getElementById('rating-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const session_name = document.getElementById('rate-session').value;
+        const rating = document.getElementById('rate-stars').value;
+        const comments = document.getElementById('rate-comments').value;
+        try {
+            await fetch(`${API_URL}/rate-session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ session_name, rating, comments })
+            });
+            alert('Rating submitted!');
+            e.target.reset();
+        } catch(err) { alert('Failed to submit rating'); }
+    });
 
     // Initial check
     checkAuthStatus();
