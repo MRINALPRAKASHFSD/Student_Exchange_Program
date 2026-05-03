@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Exchange Program | KRMU & GPI</title>
+    <meta name="description" content="K.R. Mangalam University Student Exchange Program in collaboration with Government Polytechnic Indri.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <h1><span>SOET</span> Exchange</h1>
+            </div>
+            <div class="nav-links" id="nav-links">
+                <a href="#about">About</a>
+                <a href="#schedule">Schedule</a>
+                <a href="#" id="login-btn" class="btn btn-outline">Login</a>
+                <a href="#" id="register-btn" class="btn btn-primary">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <div class="badge">Faculty-Student Exchange Programme (MoU)</div>
+                <h1 class="hero-title">Learn Beyond Boundaries, <br><span class="text-gradient">Build for the Future!</span></h1>
+                <p class="hero-subtitle">K.R. Mangalam University invites students from Government Polytechnic Indri, Haryana to participate in an immersive 5-day skill development program.</p>
+                <div class="hero-details">
+                    <div class="detail-item">
+                        <i data-lucide="calendar"></i>
+                        <span>4th May – 8th May, 2025</span>
+                    </div>
+                    <div class="detail-item">
+                        <i data-lucide="map-pin"></i>
+                        <span>SOET, K.R. Mangalam University</span>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <button class="btn btn-primary btn-large" id="cta-register">Join the Program</button>
+                    <a href="#about" class="btn btn-text">Learn More <i data-lucide="arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="hero-image glass-panel">
+                <div class="glass-content">
+                    <h3>Together for Knowledge, Innovation & Growth</h3>
+                    <p>A 5-day immersive program designed to enhance technical competencies, provide practical exposure, and develop industry-relevant skills.</p>
+                    <div class="stats">
+                        <div class="stat">
+                            <h4>5</h4>
+                            <p>Days</p>
+                        </div>
+                        <div class="stat">
+                            <h4>15+</h4>
+                            <p>Sessions</p>
+                        </div>
+                        <div class="stat">
+                            <h4>100%</h4>
+                            <p>Hands-on</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Why Participate Section -->
+    <section id="about" class="features section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Participate?</h2>
+                <p>Be part of a week that inspires growth & innovation.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon"><i data-lucide="lightbulb"></i></div>
+                    <h3>Learn from Experts</h3>
+                    <p>Gain insights directly from industry professionals and esteemed faculty.</p>
+                </div>
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon"><i data-lucide="wrench"></i></div>
+                    <h3>Hands-on Experience</h3>
+                    <p>Apply theoretical knowledge to real-world projects and lab sessions.</p>
+                </div>
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon"><i data-lucide="users"></i></div>
+                    <h3>Collaborative Learning</h3>
+                    <p>Work in teams with peers from different backgrounds.</p>
+                </div>
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon"><i data-lucide="cloud"></i></div>
+                    <h3>Industry-Relevant Skills</h3>
+                    <p>Focus on emerging tech like Cloud Computing, AI, and Cybersecurity.</p>
+                </div>
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon"><i data-lucide="briefcase"></i></div>
+                    <h3>Career Readiness</h3>
+                    <p>Resume building, interview preparation, and industry guidance.</p>
+                </div>
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon"><i data-lucide="award"></i></div>
+                    <h3>Certificate of Participation</h3>
+                    <p>Earn a recognized certificate upon successful completion.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <!-- Authentication Modal Container -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal-content glass-panel">
+            <button class="close-modal" id="close-modal"><i data-lucide="x"></i></button>
+            
+            <!-- Login Form -->
+            <div id="login-form-container" class="form-container">
+                <h2>Welcome Back</h2>
+                <p>Sign in to access your dashboard</p>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label for="login-id">Student ID</label>
+                        <input type="text" id="login-id" required placeholder="Enter your ID">
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    <p class="form-switch">Don't have an ID? <a href="#" id="switch-to-register">Register here</a></p>
+                    <div id="login-message" class="message"></div>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form-container" class="form-container hidden">
+                <h2>Join the Program</h2>
+                <p>Register to receive your unique Student ID</p>
+                <form id="register-form">
+                    <div class="input-group">
+                        <label for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" required placeholder="Enter your full name">
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-password">Create Password <span class="tooltip" title="Password must not contain any consecutive repeating characters (e.g., 'pass' is invalid because 'ss' repeats)."><i data-lucide="info" style="width: 14px; height: 14px;"></i></span></label>
+                        <input type="password" id="reg-password" required placeholder="No consecutive duplicates">
+                        <small class="password-hint">Rule: Consecutive identical characters are not allowed.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Generate Student ID</button>
+                    <p class="form-switch">Already registered? <a href="#" id="switch-to-login">Login here</a></p>
+                    <div id="register-message" class="message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Section (Hidden by default) -->
+    <section id="dashboard" class="dashboard section hidden">
+        <div class="container">
+            <div class="dashboard-header glass-panel">
+                <div>
+                    <h2>Student Dashboard</h2>
+                    <p id="dashboard-welcome">Welcome, Student</p>
+                </div>
+                <button id="logout-btn" class="btn btn-outline">Logout</button>
+            </div>
+            
+            <div class="dashboard-content">
+                <div class="glass-panel schedule-panel">
+                    <h3>Your Program Schedule</h3>
+                    <div class="schedule-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">Day 1 (May 4)</div>
+                            <div class="timeline-details">Orientation, Campus Tour & Ice Breaking</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Day 2 (May 5)</div>
+                            <div class="timeline-details">Coding Basics & GitHub Skills</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Day 3 (May 6)</div>
+                            <div class="timeline-details">AI Introduction & Innovation Workshop</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Day 4 (May 7)</div>
+                            <div class="timeline-details">Cloud, Cybersecurity & Career Guidance</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Day 5 (May 8)</div>
+                            <div class="timeline-details">Mini Projects, Presentations & Valedictory</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-panel action-panel">
+                    <h3>Quick Actions</h3>
+                    <button class="btn btn-primary btn-block mb-3">Download Full Schedule</button>
+                    <button class="btn btn-outline btn-block mb-3">View Study Materials</button>
+                    <button class="btn btn-outline btn-block">Contact Support</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-info">
+                <h3>SOET Exchange</h3>
+                <p>School of Engineering & Technology, K.R. Mangalam University</p>
+            </div>
+            <div class="footer-contact">
+                <p><i data-lucide="mail"></i> soet@krmangalam.edu.in</p>
+                <p><i data-lucide="phone"></i> (0124) 488 2222</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
