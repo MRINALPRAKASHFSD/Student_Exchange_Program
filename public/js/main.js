@@ -75,8 +75,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show Message Helper
     const showMessage = (element, text, isSuccess) => {
-        element.textContent = text;
+        element.innerHTML = text;
         element.className = `message ${isSuccess ? 'success' : 'error'}`;
+    };
+
+    window.copyStudentId = (id) => {
+        navigator.clipboard.writeText(id).then(() => {
+            showToast('Student ID copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+            showToast('Failed to copy ID', 'error');
+        });
     };
 
     // Smoother Toast Notification System
@@ -140,7 +149,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (response.ok) {
-                showMessage(registerMessage, `Success! Your Student ID is: ${data.id} (Please save this to login)`, true);
+                showMessage(registerMessage, `
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+                        <span>Success! Your Student ID is: <strong>${data.id}</strong></span>
+                        <button type="button" class="btn btn-primary" onclick="copyStudentId('${data.id}')" style="padding: 0.4rem 1rem; font-size: 0.9rem;">
+                            <i data-lucide="copy" style="width:14px; height:14px; margin-right:4px;"></i> Copy ID
+                        </button>
+                        <small>(Please save this to login)</small>
+                    </div>
+                `, true);
+                if (window.lucide) window.lucide.createIcons();
                 registerForm.reset();
                 // Optionally switch to login after a delay
                 // setTimeout(() => openModal('login'), 5000);
@@ -363,6 +381,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTableSearch('search-attendance', 'table-attendance');
     setupTableSearch('search-users', 'table-users');
     setupTableSearch('search-activities', 'table-activities');
+
+    // Scroll Animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px"
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-fade-in-up');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .glass-panel, .timeline-item').forEach(el => {
+        el.classList.add('opacity-0');
+        observer.observe(el);
+    });
 
     // Initial check
     checkAuthStatus();

@@ -48,31 +48,45 @@ a {
     border-radius: 50%;
     filter: blur(80px);
     z-index: -1;
-    animation: float 10s infinite ease-in-out alternate;
 }
 
-.blob-1 {
-    top: -10%;
-    left: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, var(--primary), transparent 70%);
-    opacity: 0.3;
-}
-
-.blob-2 {
-    bottom: 20%;
-    right: -10%;
+.bg-shape-1 {
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, var(--secondary), transparent 70%);
-    opacity: 0.2;
-    animation-delay: -5s;
+    background: radial-gradient(circle, rgba(0, 86, 179, 0.4) 0%, transparent 70%);
+    top: -200px;
+    left: -200px;
+    animation: float1 15s infinite alternate ease-in-out;
 }
 
-@keyframes float {
+.bg-shape-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0, 168, 255, 0.3) 0%, transparent 70%);
+    bottom: -100px;
+    right: -100px;
+    animation: float2 20s infinite alternate ease-in-out;
+}
+
+@keyframes float1 {
     0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(30px, 50px) scale(1.1); }
+    100% { transform: translate(100px, 100px) scale(1.1); }
+}
+
+@keyframes float2 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-100px, -50px) scale(1.2); }
+}
+
+/* Scroll Observer Utilities */
+.opacity-0 { opacity: 0; }
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Glassmorphism Panel */
@@ -707,4 +721,24 @@ footer {
     background: rgba(0,0,0,0.2);
     border: 1px solid var(--glass-border);
     color: white;
+}
+
+/* Enhancing Hover Effects */
+.feature-card, .timeline-item, .stat-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.feature-card:hover, .timeline-item:hover, .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 86, 179, 0.2);
+    border-color: rgba(0, 168, 255, 0.4);
+}
+
+.btn {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 86, 179, 0.4);
 }
