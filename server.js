@@ -7,8 +7,17 @@ const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
 
-const isVercel = process.env.VERCEL === '1';
-const uploadDir = isVercel ? '/tmp/uploads/' : 'public/uploads/';
+let isVercel = false;
+try {
+    // Attempt to write a test file to determine if the filesystem is read-only (e.g., Vercel Serverless)
+    const testPath = path.join(__dirname, '.test-write');
+    fs.writeFileSync(testPath, 'test');
+    fs.unlinkSync(testPath);
+} catch (err) {
+    isVercel = true; // Filesystem is read-only
+}
+
+const uploadDir = isVercel ? '/tmp/uploads/' : path.join(__dirname, 'public/uploads/');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
