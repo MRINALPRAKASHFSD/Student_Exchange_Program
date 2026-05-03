@@ -18,8 +18,12 @@ try {
 }
 
 const uploadDir = isVercel ? '/tmp/uploads/' : path.join(__dirname, 'public/uploads/');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+try {
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+    }
+} catch (e) {
+    console.error("Failed to create upload directory:", e);
 }
 
 // Configure multer for file uploads
@@ -44,6 +48,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 if (isVercel) {
     app.use('/uploads', express.static('/tmp/uploads'));
 }
+
+app.get('/api/debug', (req, res) => {
+    res.json({
+        isVercel,
+        uploadDir,
+        dbPath: isVercel ? '/tmp/database.sqlite' : './database.sqlite',
+        dirname: __dirname,
+        node_env: process.env.NODE_ENV,
+        vercel_env: process.env.VERCEL
+    });
+});
 
 // Database setup
 const dbPath = isVercel ? '/tmp/database.sqlite' : './database.sqlite';
@@ -308,6 +323,12 @@ app.get('/api/user/certificate', authenticateToken, (req, res) => {
 // Fallback for SPA routing
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error("Unhandled Error:", err);
+    res.status(500).json({ error: 'Internal Server Error', details: err.message, stack: err.stack });
 });
 
 if (!isVercel) {
