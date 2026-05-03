@@ -9,12 +9,12 @@ try {
         Database: class {
             constructor(path, cb) {
                 this.isMock = true;
-                if (cb) setTimeout(() => cb(new Error("SQLite3 failed to load native bindings: " + e.message)), 0);
+                if (cb) setTimeout(() => cb(), 0);
             }
-            serialize() {}
-            run() {}
-            get() {}
-            all() {}
+            serialize(cb) { if(cb) cb(); }
+            run(sql, params, cb) { if(typeof params === 'function') cb = params; if(cb) cb(new Error("Mock db")); }
+            get(sql, params, cb) { if(typeof params === 'function') cb = params; if(cb) cb(new Error("Native binding failed: " + e.message)); }
+            all(sql, params, cb) { if(typeof params === 'function') cb = params; if(cb) cb(new Error("Mock db")); }
         }
     };
 }
