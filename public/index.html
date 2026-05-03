@@ -297,12 +297,15 @@
 
             <div class="glass-panel mb-3">
                 <h3>Latest Attendance</h3>
-                <table class="admin-table">
-                    <thead>
-                        <tr><th>Student</th><th>ID</th><th>Date</th><th>Status</th></tr>
-                    </thead>
-                    <tbody id="admin-attendance-body"></tbody>
-                </table>
+                <input type="text" id="search-attendance" class="admin-search" placeholder="Search by name or ID...">
+                <div class="table-responsive">
+                    <table class="admin-table" id="table-attendance">
+                        <thead>
+                            <tr><th>Student</th><th>ID</th><th>Date</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="admin-attendance-body"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="glass-panel mb-3">
@@ -312,32 +315,40 @@
 
             <div class="glass-panel mb-3">
                 <h3>Session Ratings</h3>
-                <table class="admin-table">
-                    <thead>
-                        <tr><th>Student</th><th>Session</th><th>Rating</th><th>Comments</th></tr>
-                    </thead>
-                    <tbody id="admin-ratings-body"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr><th>Student</th><th>Session</th><th>Rating</th><th>Comments</th></tr>
+                        </thead>
+                        <tbody id="admin-ratings-body"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="glass-panel mb-3">
                 <h3>All Registered Users</h3>
-                <table class="admin-table">
-                    <thead>
-                        <tr><th>ID</th><th>Name</th><th>Role</th></tr>
-                    </thead>
-                    <tbody id="admin-users-body"></tbody>
-                </table>
+                <input type="text" id="search-users" class="admin-search" placeholder="Search by name or ID...">
+                <div class="table-responsive">
+                    <table class="admin-table" id="table-users">
+                        <thead>
+                            <tr><th>ID</th><th>Name</th><th>Role</th></tr>
+                        </thead>
+                        <tbody id="admin-users-body"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="glass-panel mb-3">
                 <h3>Full System Activity Logs</h3>
-                <table class="admin-table">
-                    <thead>
-                        <tr><th>Timestamp</th><th>Student</th><th>Activity</th></tr>
-                    </thead>
-                    <tbody id="admin-activities-body"></tbody>
-                </table>
+                <input type="text" id="search-activities" class="admin-search" placeholder="Search activities by student name or ID...">
+                <div class="table-responsive">
+                    <table class="admin-table" id="table-activities">
+                        <thead>
+                            <tr><th>Timestamp</th><th>Student</th><th>Activity</th></tr>
+                        </thead>
+                        <tbody id="admin-activities-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </section>

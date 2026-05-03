@@ -348,6 +348,22 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(err) { showToast('Failed to submit rating', 'error'); }
     });
 
+    // Admin Table Search Filtering
+    const setupTableSearch = (inputId, tableId) => {
+        document.getElementById(inputId)?.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        });
+    };
+
+    setupTableSearch('search-attendance', 'table-attendance');
+    setupTableSearch('search-users', 'table-users');
+    setupTableSearch('search-activities', 'table-activities');
+
     // Initial check
     checkAuthStatus();
 });

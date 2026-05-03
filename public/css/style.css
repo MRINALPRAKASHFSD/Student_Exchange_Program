@@ -676,8 +676,35 @@ footer {
 .admin-table th {
     background: rgba(0,0,0,0.2);
     color: var(--primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 .admin-table img {
     max-width: 100px;
     border-radius: 4px;
+}
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: rgba(0,0,0,0.1);
+}
+/* Custom Scrollbar for tables */
+.table-responsive::-webkit-scrollbar {
+    width: 8px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+.admin-search {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
+    color: white;
 }
