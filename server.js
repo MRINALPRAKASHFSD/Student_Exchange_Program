@@ -4,6 +4,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const cors = require('cors');
+const multer = require('multer');
+const fs = require('fs');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +46,40 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
             activity TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
+        
+        db.run(`CREATE TABLE IF NOT EXISTS attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            date TEXT,
+            status TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        
+        db.run(`CREATE TABLE IF NOT EXISTS photos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            filename TEXT,
+            description TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        
+        db.run(`CREATE TABLE IF NOT EXISTS ratings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            session_name TEXT,
+            rating INTEGER,
+            comments TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Ensure default admin exists
+        db.get('SELECT id FROM users WHERE role = ?', ['admin'], (err, row) => {
+            if (!row) {
+                bcrypt.hash('admin123', 10, (err, hash) => {
+                    db.run('INSERT INTO users (id, name, password, role) VALUES (?, ?, ?, ?)', ['ADMIN123', 'Administrator', hash, 'admin']);
+                });
+            }
+        });
     }
 });
 
@@ -132,9 +179,74 @@ function authenticateToken(req, res, next) {
     });
 }
 
+// Middleware for Admin access
+function authenticateAdmin(req, res, next) {
+    authenticateToken(req, res, () => {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admin access required' });
+        }
+        next();
+    });
+}
+
 // Dashboard data route
 app.get('/api/dashboard', authenticateToken, (req, res) => {
     res.json({ message: `Welcome to the Student Exchange Program Dashboard, ${req.user.name}!`, user: req.user });
+});
+
+// Post attendance
+app.post('/api/attendance', authenticateToken, (req, res) => {
+    const { date, status } = req.body;
+    db.run('INSERT INTO attendance (user_id, date, status) VALUES (?, ?, ?)', [req.user.id, date, status], function(err) {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        
+        db.run('INSERT INTO activities (user_id, activity) VALUES (?, ?)', [req.user.id, `Logged attendance for ${date}`]);
+        res.json({ message: 'Attendance logged successfully' });
+    });
+});
+
+// Upload photo
+app.post('/api/upload-photo', authenticateToken, upload.single('photo'), (req, res) => {
+    const { description } = req.body;
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    db.run('INSERT INTO photos (user_id, filename, description) VALUES (?, ?, ?)', [req.user.id, req.file.filename, description], function(err) {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        
+        db.run('INSERT INTO activities (user_id, activity) VALUES (?, ?)', [req.user.id, 'Uploaded a photo']);
+        res.json({ message: 'Photo uploaded successfully', filename: req.file.filename });
+    });
+});
+
+// Rate session
+app.post('/api/rate-session', authenticateToken, (req, res) => {
+    const { session_name, rating, comments } = req.body;
+    db.run('INSERT INTO ratings (user_id, session_name, rating, comments) VALUES (?, ?, ?, ?)', [req.user.id, session_name, rating, comments], function(err) {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        
+        db.run('INSERT INTO activities (user_id, activity) VALUES (?, ?)', [req.user.id, `Rated session: ${session_name}`]);
+        res.json({ message: 'Rating submitted successfully' });
+    });
+});
+
+// Admin Dashboard Data
+app.get('/api/admin/dashboard', authenticateAdmin, (req, res) => {
+    const data = {};
+    db.all('SELECT id, name, role FROM users', [], (err, users) => {
+        data.users = users || [];
+        db.all('SELECT a.id, u.name, u.id as student_id, a.date, a.status, a.timestamp FROM attendance a JOIN users u ON a.user_id = u.id ORDER BY a.timestamp DESC', [], (err, attendance) => {
+            data.attendance = attendance || [];
+            db.all('SELECT p.id, u.name, u.id as student_id, p.filename, p.description, p.timestamp FROM photos p JOIN users u ON p.user_id = u.id ORDER BY p.timestamp DESC', [], (err, photos) => {
+                data.photos = photos || [];
+                db.all('SELECT r.id, u.name, u.id as student_id, r.session_name, r.rating, r.comments, r.timestamp FROM ratings r JOIN users u ON r.user_id = u.id ORDER BY r.timestamp DESC', [], (err, ratings) => {
+                    data.ratings = ratings || [];
+                    db.all('SELECT ac.id, u.name, u.id as student_id, ac.activity, ac.timestamp FROM activities ac JOIN users u ON ac.user_id = u.id ORDER BY ac.timestamp DESC LIMIT 100', [], (err, activities) => {
+                        data.activities = activities || [];
+                        res.json(data);
+                    });
+                });
+            });
+        });
+    });
 });
 
 // Fallback to index.html for SPA-like behavior if needed
