@@ -10,9 +10,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <!-- Background Elements -->
-    <div class="blob-1"></div>
-    <div class="blob-2"></div>
+    <!-- Background animated via CSS pseudo-elements -->
 
     <!-- Navigation -->
     <nav class="navbar">
@@ -51,6 +49,7 @@
                     <a href="#about" class="btn btn-text">Learn More <i data-lucide="arrow-right"></i></a>
                 </div>
             </div>
+            <div class="hero-image-wrap">
             <div class="hero-image glass-panel">
                 <div class="glass-content">
                     <h3>Together for Knowledge, Innovation & Growth</h3>
@@ -71,17 +70,18 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     </header>
 
     <!-- Why Participate Section -->
-    <section id="about" class="features section">
+    <section id="about" class="features section" id="about">
         <div class="container">
             <div class="section-header">
                 <h2>Why Participate?</h2>
                 <p>Be part of a week that inspires growth & innovation.</p>
             </div>
-            <div class="features-grid">
+            <div class="features-grid reveal">
                 <div class="feature-card glass-panel">
                     <div class="feature-icon"><i data-lucide="lightbulb"></i></div>
                     <h3>Learn from Experts</h3>
@@ -378,6 +378,38 @@
     <script src="js/main.js"></script>
     <script>
         lucide.createIcons();
+
+        // Navbar scroll effect
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        // Scroll-reveal observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => observer.observe(el));
+
+        // Stagger feature cards
+        document.querySelectorAll('.feature-card').forEach((card, i) => {
+            card.style.transitionDelay = (i * 0.1) + 's';
+            card.classList.add('reveal');
+            observer.observe(card);
+        });
+
+        // Stagger stat cards
+        document.querySelectorAll('.stat-card').forEach((card, i) => {
+            card.style.transitionDelay = (i * 0.08) + 's';
+            card.classList.add('reveal');
+            observer.observe(card);
+        });
     </script>
 </body>
 </html>
