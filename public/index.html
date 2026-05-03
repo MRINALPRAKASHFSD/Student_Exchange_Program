@@ -201,12 +201,123 @@
                     </div>
                 </div>
                 
-                <div class="glass-panel action-panel">
-                    <h3>Quick Actions</h3>
-                    <button class="btn btn-primary btn-block mb-3">Download Full Schedule</button>
-                    <button class="btn btn-outline btn-block mb-3">View Study Materials</button>
-                    <button class="btn btn-outline btn-block">Contact Support</button>
+                <div class="action-panel">
+                    <div class="glass-panel mb-3">
+                        <h3>Lodge Attendance</h3>
+                        <form id="attendance-form">
+                            <div class="form-group">
+                                <label for="att-date">Date</label>
+                                <input type="date" id="att-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="att-status">Status</label>
+                                <select id="att-status" required>
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                                    <option value="Late">Late</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Submit Attendance</button>
+                        </form>
+                    </div>
+
+                    <div class="glass-panel mb-3">
+                        <h3>Upload Photograph</h3>
+                        <form id="photo-form">
+                            <div class="form-group">
+                                <label for="photo-file">Select Image</label>
+                                <input type="file" id="photo-file" accept="image/*" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="photo-desc">Description (Optional)</label>
+                                <input type="text" id="photo-desc" placeholder="What's happening here?">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Upload</button>
+                        </form>
+                    </div>
+
+                    <div class="glass-panel">
+                        <h3>Rate a Session</h3>
+                        <form id="rating-form">
+                            <div class="form-group">
+                                <label for="rate-session">Session Name</label>
+                                <select id="rate-session" required>
+                                    <option value="Day 1: Orientation">Day 1: Orientation</option>
+                                    <option value="Day 2: Coding Basics">Day 2: Coding Basics</option>
+                                    <option value="Day 3: AI Intro">Day 3: AI Intro</option>
+                                    <option value="Day 4: Cloud & Cyber">Day 4: Cloud & Cyber</option>
+                                    <option value="Day 5: Mini Projects">Day 5: Mini Projects</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="rate-stars">Rating (1-5)</label>
+                                <input type="number" id="rate-stars" min="1" max="5" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="rate-comments">Comments</label>
+                                <textarea id="rate-comments" rows="3" placeholder="Your feedback..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Submit Rating</button>
+                        </form>
+                    </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Dashboard Section -->
+    <section id="admin-dashboard" class="dashboard section hidden">
+        <div class="container">
+            <div class="dashboard-header glass-panel">
+                <div>
+                    <h2>Admin Control Center</h2>
+                    <p>Overview of Student Exchange Program Data</p>
+                </div>
+                <button id="admin-logout-btn" class="btn btn-outline">Logout</button>
+            </div>
+            
+            <div class="admin-stats" id="admin-stats-container">
+                <div class="stat-card">
+                    <h3 id="stat-students">0</h3>
+                    <p>Total Students</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-attendance">0</h3>
+                    <p>Attendance Logs</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-photos">0</h3>
+                    <p>Photos Uploaded</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-ratings">0</h3>
+                    <p>Session Ratings</p>
+                </div>
+            </div>
+
+            <div class="glass-panel mb-3">
+                <h3>Latest Attendance</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Student</th><th>ID</th><th>Date</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="admin-attendance-body"></tbody>
+                </table>
+            </div>
+
+            <div class="glass-panel mb-3">
+                <h3>Recent Photos</h3>
+                <div id="admin-photos-grid" style="display: flex; gap: 1rem; flex-wrap: wrap;"></div>
+            </div>
+
+            <div class="glass-panel mb-3">
+                <h3>Session Ratings</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Student</th><th>Session</th><th>Rating</th><th>Comments</th></tr>
+                    </thead>
+                    <tbody id="admin-ratings-body"></tbody>
+                </table>
             </div>
         </div>
     </section>
