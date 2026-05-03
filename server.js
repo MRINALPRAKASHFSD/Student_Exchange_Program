@@ -68,14 +68,37 @@ if (isVercel) {
 }
 
 app.get('/api/debug', (req, res) => {
-    res.json({
-        isVercel,
-        uploadDir,
-        dbPath: isVercel ? '/tmp/database.sqlite' : './database.sqlite',
-        dirname: __dirname,
-        node_env: process.env.NODE_ENV,
-        vercel_env: process.env.VERCEL
-    });
+    let dbStatus = "pending";
+    let timeout = setTimeout(() => {
+        if (!res.headersSent) {
+            res.json({ error: "Database query timed out", isVercel, uploadDir, isMock: !!sqlite3?.Database?.prototype?.isMock });
+        }
+    }, 2000);
+
+    try {
+        if (db && !db.isMock) {
+            db.get("SELECT count(*) as c FROM users", (err, row) => {
+                clearTimeout(timeout);
+                if (!res.headersSent) {
+                    res.json({
+                        isVercel,
+                        uploadDir,
+                        dbPath: isVercel ? '/tmp/database.sqlite' : './database.sqlite',
+                        dirname: __dirname,
+                        isMock: !!sqlite3?.Database?.prototype?.isMock,
+                        dbError: err ? err.message : null,
+                        userCount: row ? row.c : null
+                    });
+                }
+            });
+        } else {
+            clearTimeout(timeout);
+            res.json({ isVercel, isMock: true, msg: "Database is mocked" });
+        }
+    } catch(e) {
+        clearTimeout(timeout);
+        res.json({ error: e.message });
+    }
 });
 
 // Database setup
