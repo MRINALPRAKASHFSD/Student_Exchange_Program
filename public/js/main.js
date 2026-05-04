@@ -73,6 +73,72 @@ document.addEventListener('DOMContentLoaded', () => {
     // API Base URL
     const API_URL = '/api';
 
+    // Network Status monitoring
+    const updateOnlineStatus = () => {
+        const isOnline = navigator.onLine;
+        if (!isOnline) {
+            showToast('You are currently offline. Actions will be retried when connection returns.', 'error');
+        } else {
+            // Check if we have queued actions
+            const queue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
+            if (queue.length > 0) {
+                showToast(`Back online! Syncing ${queue.length} pending actions...`);
+                syncOfflineQueue();
+            }
+        }
+    };
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    // Queue failed actions for offline support
+    const queueOfflineAction = (type, data) => {
+        const queue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
+        queue.push({ type, data, timestamp: Date.now(), token: localStorage.getItem('token') });
+        localStorage.setItem('offline_queue', JSON.stringify(queue));
+    };
+
+    const syncOfflineQueue = async () => {
+        const queue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
+        if (queue.length === 0) return;
+
+        const remaining = [];
+        for (const action of queue) {
+            try {
+                const url = action.type === 'attendance' ? `${API_URL}/attendance` : `${API_URL}/rate-session`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${action.token}` },
+                    body: JSON.stringify(action.data)
+                });
+                if (!res.ok) throw new Error('Sync failed');
+            } catch (err) {
+                remaining.push(action);
+            }
+        }
+
+        localStorage.setItem('offline_queue', JSON.stringify(remaining));
+        if (remaining.length === 0) {
+            showToast('All offline data synchronized successfully!');
+        }
+    };
+
+    // Robust Fetch with Retries
+    const robustFetch = async (url, options = {}, retries = 3, backoff = 1000) => {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok && response.status >= 500 && retries > 0) {
+                throw new Error('Server error');
+            }
+            return response;
+        } catch (err) {
+            if (retries > 0) {
+                console.warn(`Fetch failed, retrying in ${backoff}ms... (${retries} retries left)`);
+                await new Promise(resolve => setTimeout(resolve, backoff));
+                return robustFetch(url, options, retries - 1, backoff * 2);
+            }
+            throw err;
+        }
+    };
+
     // Show Message Helper
     const showMessage = (element, text, isSuccess) => {
         element.innerHTML = text;
@@ -258,8 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = document.getElementById('login-id').value.trim().replace(/[.,;\s]+$/, '');
         const password = document.getElementById('login-password').value;
 
+        const originalBtnText = loginForm.querySelector('button').textContent;
+        loginForm.querySelector('button').textContent = 'Logging in...';
+        loginForm.querySelector('button').disabled = true;
+
         try {
-            const response = await fetch(`${API_URL}/login`, {
+            const response = await robustFetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id, password })
@@ -268,11 +338,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (response.ok) {
-                // Save token
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                
-                // Show dashboard
                 closeModal();
                 loginForm.reset();
                 checkAuthStatus();
@@ -280,7 +347,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 showMessage(loginMessage, data.error || 'Login failed.', false);
             }
         } catch (err) {
-            showMessage(loginMessage, 'Server error. Please try again.', false);
+            showMessage(loginMessage, 'Connection error. Retrying...', false);
+        } finally {
+            loginForm.querySelector('button').textContent = originalBtnText;
+            loginForm.querySelector('button').disabled = false;
         }
     });
 
@@ -682,32 +752,73 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const btn = e.target.querySelector('button');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        const payload = { date, session, status };
+
         try {
-            await fetch(`${API_URL}/attendance`, {
+            const res = await robustFetch(`${API_URL}/attendance`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ date, session, status })
+                body: JSON.stringify(payload)
             });
-            showToast('Attendance successfully submitted!');
+            if (res.ok) {
+                showToast('Attendance successfully submitted!');
+                e.target.reset();
+                updateSessions();
+            } else {
+                throw new Error('Submission failed');
+            }
+        } catch(err) { 
+            showToast('Submission failed. Saved to offline queue.', 'info');
+            queueOfflineAction('attendance', payload);
             e.target.reset();
-            updateSessions(); // Reset dropdowns
-        } catch(err) { showToast('Failed to submit attendance', 'error'); }
+            updateSessions();
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
     });
 
     document.getElementById('photo-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const file = document.getElementById('photo-file').files[0];
+        const desc = document.getElementById('photo-desc').value;
+        
+        if (!file) return showToast('Please select a file', 'error');
+
+        const btn = e.target.querySelector('button');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Uploading (Keep app open)...';
+
         const formData = new FormData();
-        formData.append('photo', document.getElementById('photo-file').files[0]);
-        formData.append('description', document.getElementById('photo-desc').value);
+        formData.append('photo', file);
+        formData.append('description', desc);
+
         try {
-            await fetch(`${API_URL}/upload-photo`, {
+            const res = await robustFetch(`${API_URL}/upload-photo`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: formData
-            });
-            showToast('Photograph uploaded securely!');
-            e.target.reset();
-        } catch(err) { showToast('Failed to upload photo', 'error'); }
+            }, 2, 2000); // More retries for photos
+
+            if (res.ok) {
+                showToast('Photograph uploaded securely!');
+                e.target.reset();
+            } else {
+                const data = await res.json();
+                showToast(data.error || 'Upload failed', 'error');
+            }
+        } catch(err) { 
+            showToast('Network error during upload. Please try again when signal is stronger.', 'error'); 
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
     });
 
     document.getElementById('rating-form')?.addEventListener('submit', async (e) => {
@@ -724,16 +835,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const rating = document.getElementById('rate-stars').value;
         const comments = document.getElementById('rate-comments').value;
+
+        const btn = e.target.querySelector('button');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        const payload = { session_name, rating, comments };
+
         try {
-            await fetch(`${API_URL}/rate-session`, {
+            const res = await robustFetch(`${API_URL}/rate-session`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ session_name, rating, comments })
+                body: JSON.stringify(payload)
             });
-            showToast('Session rating submitted. Thank you!');
+            if (res.ok) {
+                showToast('Session rating submitted. Thank you!');
+                e.target.reset();
+                if (rateDateSelect) updateRatingSessions();
+            } else {
+                throw new Error('Rating failed');
+            }
+        } catch(err) { 
+            showToast('Rating saved to offline queue.', 'info');
+            queueOfflineAction('rating', payload);
             e.target.reset();
             if (rateDateSelect) updateRatingSessions();
-        } catch(err) { showToast('Failed to submit rating', 'error'); }
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
     });
 
     // Admin Table Search & Filter
