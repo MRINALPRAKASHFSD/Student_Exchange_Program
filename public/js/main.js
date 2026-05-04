@@ -520,6 +520,48 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize sessions for the default date
     if (attDateSelect) updateSessions();
 
+    // Rating Session Logic
+    const rateDateSelect = document.getElementById('rate-date');
+    const rateSessionSelect = document.getElementById('rate-session');
+    const rateCustomSessionGroup = document.getElementById('rate-custom-session-group');
+    const rateCustomSessionInput = document.getElementById('rate-custom-session');
+
+    const updateRatingSessions = () => {
+        const selectedDate = rateDateSelect.value;
+        const sessions = SESSIONS[selectedDate] || [];
+        
+        rateSessionSelect.innerHTML = '<option value="" disabled selected>Select a session</option>';
+        
+        sessions.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            rateSessionSelect.appendChild(opt);
+        });
+
+        const otherOpt = document.createElement('option');
+        otherOpt.value = "other";
+        otherOpt.textContent = "Other (Manual Entry)";
+        rateSessionSelect.appendChild(otherOpt);
+
+        rateCustomSessionGroup.classList.add('hidden');
+        rateCustomSessionInput.required = false;
+    };
+
+    rateDateSelect?.addEventListener('change', updateRatingSessions);
+    
+    rateSessionSelect?.addEventListener('change', () => {
+        if (rateSessionSelect.value === 'other') {
+            rateCustomSessionGroup.classList.remove('hidden');
+            rateCustomSessionInput.required = true;
+        } else {
+            rateCustomSessionGroup.classList.add('hidden');
+            rateCustomSessionInput.required = false;
+        }
+    });
+
+    if (rateDateSelect) updateRatingSessions();
+
     // Form submission handlers for new Student actions
     document.getElementById('attendance-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -566,7 +608,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('rating-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const session_name = document.getElementById('rate-session').value;
+        let session_name = document.getElementById('rate-session').value;
+        if (session_name === 'other') {
+            session_name = document.getElementById('rate-custom-session').value;
+        }
+
+        if (!session_name) {
+            showToast('Please select or enter a session', 'error');
+            return;
+        }
+
         const rating = document.getElementById('rate-stars').value;
         const comments = document.getElementById('rate-comments').value;
         try {
@@ -577,6 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             showToast('Session rating submitted. Thank you!');
             e.target.reset();
+            if (rateDateSelect) updateRatingSessions();
         } catch(err) { showToast('Failed to submit rating', 'error'); }
     });
 
@@ -602,6 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupTableSearch('search-users', 'table-users');
     setupTableSearch('search-activities', 'table-activities');
+    setupTableSearch('search-ratings', 'table-ratings');
 
     // Scroll Animations
     const observerOptions = {
