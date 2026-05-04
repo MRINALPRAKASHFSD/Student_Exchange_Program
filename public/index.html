@@ -333,7 +333,12 @@
             </div>
 
             <div class="glass-panel mb-3">
-                <h3>Session-wise Attendance Summary</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">Session-wise Attendance Summary</h3>
+                    <button onclick="downloadTableAsCSV('admin-session-summary-body', 'attendance_summary.csv')" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                        <i data-lucide="download" style="width: 14px; height: 14px; margin-right: 4px;"></i> Export CSV
+                    </button>
+                </div>
                 <div class="table-responsive">
                     <table class="admin-table">
                         <thead>
@@ -345,7 +350,12 @@
             </div>
 
             <div class="glass-panel mb-3">
-                <h3>Latest Attendance</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">Latest Attendance</h3>
+                    <button onclick="downloadTableAsCSV('admin-attendance-body', 'detailed_attendance.csv')" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                        <i data-lucide="download" style="width: 14px; height: 14px; margin-right: 4px;"></i> Export CSV
+                    </button>
+                </div>
                 <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
                     <input type="text" id="search-attendance" class="admin-search" placeholder="Search by name or ID..." style="flex: 2; margin-bottom: 0;">
                     <select id="filter-session" class="admin-search" style="flex: 1; margin-bottom: 0;">
@@ -369,7 +379,12 @@
             </div>
 
             <div class="glass-panel mb-3">
-                <h3>Session Ratings</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">Session Ratings</h3>
+                    <button onclick="downloadTableAsCSV('admin-ratings-body', 'session_ratings.csv')" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                        <i data-lucide="download" style="width: 14px; height: 14px; margin-right: 4px;"></i> Export CSV
+                    </button>
+                </div>
                 <input type="text" id="search-ratings" class="admin-search" placeholder="Search by session name or student...">
                 <div class="table-responsive">
                     <table class="admin-table" id="table-ratings">
@@ -382,7 +397,12 @@
             </div>
 
             <div class="glass-panel mb-3">
-                <h3>All Registered Users</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">All Registered Users</h3>
+                    <button onclick="downloadTableAsCSV('admin-users-body', 'registered_users.csv')" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                        <i data-lucide="download" style="width: 14px; height: 14px; margin-right: 4px;"></i> Export CSV
+                    </button>
+                </div>
                 <input type="text" id="search-users" class="admin-search" placeholder="Search by name or ID...">
                 <div class="table-responsive">
                     <table class="admin-table" id="table-users">
@@ -395,7 +415,12 @@
             </div>
 
             <div class="glass-panel mb-3">
-                <h3>Full System Activity Logs</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">Full System Activity Logs</h3>
+                    <button onclick="downloadTableAsCSV('admin-activities-body', 'activity_logs.csv')" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                        <i data-lucide="download" style="width: 14px; height: 14px; margin-right: 4px;"></i> Export CSV
+                    </button>
+                </div>
                 <input type="text" id="search-activities" class="admin-search" placeholder="Search activities by student name or ID...">
                 <div class="table-responsive">
                     <table class="admin-table" id="table-activities">

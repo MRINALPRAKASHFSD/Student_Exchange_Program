@@ -81,11 +81,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.copyStudentId = (id) => {
         navigator.clipboard.writeText(id).then(() => {
-            showToast('Student ID copied to clipboard!');
+            showToast('Copied to clipboard!');
         }).catch(err => {
             console.error('Failed to copy text: ', err);
-            showToast('Failed to copy ID', 'error');
+            showToast('Failed to copy', 'error');
         });
+    };
+
+    window.downloadTableAsCSV = (tbodyId, filename) => {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return showToast('Table data not found', 'error');
+        
+        const rows = Array.from(tbody.rows);
+        if (rows.length === 0) return showToast('No data to export', 'error');
+
+        // Get headers from the parent table
+        const table = tbody.closest('table');
+        const headerRow = table.querySelector('thead tr');
+        const headers = Array.from(headerRow.cells).map(cell => `"${cell.textContent.trim()}"`);
+
+        const csvData = rows.map(row => {
+            return Array.from(row.cells).map(cell => {
+                let text = cell.textContent.trim();
+                // Escape quotes and wrap in quotes if contains comma
+                return `"${text.replace(/"/g, '""')}"`;
+            }).join(',');
+        });
+
+        const csvContent = [headers.join(','), ...csvData].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast(`Downloaded ${filename}`);
     };
 
     // Smoother Toast Notification System
