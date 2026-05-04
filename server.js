@@ -99,7 +99,7 @@ function saveDB(data) {
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 app.use('/uploads', express.static(uploadDir));
 
 // Route to serve photos (handles Vercel /tmp/uploads)
@@ -252,7 +252,7 @@ app.get('/api/admin/backup', authenticateAdmin, (req, res) => {
 
 // SPA Support - Catch-all fallback
 app.use((req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
