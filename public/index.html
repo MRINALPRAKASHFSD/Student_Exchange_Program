@@ -308,7 +308,7 @@
                 </div>
                 <div class="stat-card">
                     <h3 id="stat-attendance">0</h3>
-                    <p>Attendance Logs</p>
+                    <p>Session Logs</p>
                 </div>
                 <div class="stat-card">
                     <h3 id="stat-photos">0</h3>
@@ -321,8 +321,26 @@
             </div>
 
             <div class="glass-panel mb-3">
+                <h3>Session-wise Attendance Summary</h3>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr><th>Session</th><th>Date</th><th>Present Count</th></tr>
+                        </thead>
+                        <tbody id="admin-session-summary-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="glass-panel mb-3">
                 <h3>Latest Attendance</h3>
-                <input type="text" id="search-attendance" class="admin-search" placeholder="Search by name or ID...">
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <input type="text" id="search-attendance" class="admin-search" placeholder="Search by name or ID..." style="flex: 2; margin-bottom: 0;">
+                    <select id="filter-session" class="admin-search" style="flex: 1; margin-bottom: 0;">
+                        <option value="">All Sessions</option>
+                        <!-- Will be populated by JS -->
+                    </select>
+                </div>
                 <div class="table-responsive">
                     <table class="admin-table" id="table-attendance">
                         <thead>

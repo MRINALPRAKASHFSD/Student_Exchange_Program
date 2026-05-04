@@ -234,6 +234,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     </tr>
                 `).join('');
 
+                // Render Session Summary
+                const summaryMap = {};
+                data.attendance.forEach(a => {
+                    if (a.status === 'Present') {
+                        const key = `${a.date}|${a.session}`;
+                        summaryMap[key] = (summaryMap[key] || 0) + 1;
+                    }
+                });
+
+                document.getElementById('admin-session-summary-body').innerHTML = Object.entries(summaryMap)
+                    .map(([key, count]) => {
+                        const [date, session] = key.split('|');
+                        return `<tr><td>${session}</td><td>${date}</td><td>${count} Students</td></tr>`;
+                    }).sort((a, b) => b.includes('Students') ? -1 : 1) // Simple sort
+                    .join('');
+
                 // Render Photos
                 document.getElementById('admin-photos-grid').innerHTML = data.photos.map(p => `
                     <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; width: 150px;">
@@ -278,6 +294,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${a.activity}</td>
                     </tr>
                 `).join('');
+                // Populate Session Filter Dropdown
+                const sessionFilter = document.getElementById('filter-session');
+                const allSessions = new Set();
+                data.attendance.forEach(a => { if(a.session) allSessions.add(a.session); });
+                
+                const currentFilter = sessionFilter.value;
+                sessionFilter.innerHTML = '<option value="">All Sessions</option>';
+                Array.from(allSessions).sort().forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    sessionFilter.appendChild(opt);
+                });
+                sessionFilter.value = currentFilter;
             }
         } catch (e) {
             console.error('Failed to load admin dashboard', e);
@@ -550,19 +580,26 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(err) { showToast('Failed to submit rating', 'error'); }
     });
 
-    // Admin Table Search Filtering
-    const setupTableSearch = (inputId, tableId) => {
-        document.getElementById(inputId)?.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(term) ? '' : 'none';
-            });
+    // Admin Table Search & Filter
+    const filterAttendanceTable = () => {
+        const searchTerm = document.getElementById('search-attendance')?.value.toLowerCase() || '';
+        const sessionFilter = document.getElementById('filter-session')?.value || '';
+        const rows = document.querySelectorAll('#table-attendance tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const sessionCell = row.cells[3]?.textContent || '';
+            
+            const matchesSearch = text.includes(searchTerm);
+            const matchesSession = sessionFilter === '' || sessionCell === sessionFilter;
+            
+            row.style.display = (matchesSearch && matchesSession) ? '' : 'none';
         });
     };
 
-    setupTableSearch('search-attendance', 'table-attendance');
+    document.getElementById('search-attendance')?.addEventListener('input', filterAttendanceTable);
+    document.getElementById('filter-session')?.addEventListener('change', filterAttendanceTable);
+
     setupTableSearch('search-users', 'table-users');
     setupTableSearch('search-activities', 'table-activities');
 
