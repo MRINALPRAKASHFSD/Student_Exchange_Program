@@ -150,14 +150,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 showMessage(registerMessage, `
-                    <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
-                        <span>Success! Your Student ID is: <strong>${data.id}</strong></span>
-                        <button type="button" class="btn btn-primary" onclick="copyStudentId('${data.id}')" style="padding: 0.4rem 1rem; font-size: 0.9rem;">
-                            <i data-lucide="copy" style="width:14px; height:14px; margin-right:4px;"></i> Copy ID
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; text-align:center;">
+                        <span>Success! Your ID: <strong style="color:var(--primary); font-size:1.1rem;">${data.id}</strong></span>
+                        <div style="background:rgba(255,255,255,0.05); padding:0.8rem; border-radius:12px; border:1px solid var(--glass-border); width:100%; margin:0.5rem 0;">
+                            <span style="font-size:0.8rem; opacity:0.7;">Temporary Login Token:</span>
+                            <div style="font-size:1.6rem; font-weight:800; letter-spacing:3px; margin:0.4rem 0; color:#fff;">${data.tempToken}</div>
+                            <div id="token-timer" style="font-size:0.75rem; color:#ff4d4d; font-weight:600;">Expires in: 60s</div>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="copyStudentId('${data.tempToken}'); document.getElementById('login-id').value='${data.id}'; openModal('login');" style="padding: 0.5rem 1rem; font-size: 0.9rem; width:100%;">
+                            Copy & Go to Login
                         </button>
-                        <small>(Please save this to login)</small>
+                        <small style="opacity:0.6; font-size:0.7rem; margin-top:0.4rem;">Paste the token in the <strong>Password</strong> field. Expiring in 60s.</small>
                     </div>
                 `, true);
+
+                let timeLeft = 60;
+                const timerInterval = setInterval(() => {
+                    timeLeft--;
+                    const timerEl = document.getElementById('token-timer');
+                    if (timerEl) {
+                        timerEl.textContent = `Expires in: ${timeLeft}s`;
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            timerEl.textContent = 'Token Expired';
+                            timerEl.style.color = '#777';
+                        }
+                    } else {
+                        clearInterval(timerInterval);
+                    }
+                }, 1000);
+
                 if (window.lucide) window.lucide.createIcons();
                 registerForm.reset();
                 // Optionally switch to login after a delay

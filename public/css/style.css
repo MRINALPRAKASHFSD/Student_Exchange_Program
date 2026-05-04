@@ -100,19 +100,22 @@ body::after {
 .reveal {
     opacity:0;
     transform:translateY(36px);
-    transition:opacity 0.7s ease, transform 0.7s ease;
+    transition:opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.reveal.visible {
-    opacity:1;
-    transform:translateY(0);
+.reveal.visible, .animate-fade-in-up {
+    opacity:1 !important;
+    transform:translateY(0) !important;
 }
-.reveal-left  { opacity:0; transform:translateX(-40px); transition:opacity 0.7s ease,transform 0.7s ease; }
-.reveal-right { opacity:0; transform:translateX( 40px); transition:opacity 0.7s ease,transform 0.7s ease; }
-.reveal-left.visible, .reveal-right.visible { opacity:1; transform:translateX(0); }
 
 /* ── Layout ─────────────────────────────── */
-.container { width:90%; max-width:1200px; margin:0 auto; }
-.section { padding:5rem 0; }
+.container { 
+    width: 95%; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 0 1.5rem;
+    box-sizing: border-box;
+}
+.section { padding: 6rem 0; overflow: hidden; }
 .hidden { display:none !important; }
 .mb-3 { margin-bottom:1.25rem; }
 

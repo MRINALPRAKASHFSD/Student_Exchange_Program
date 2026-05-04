@@ -142,9 +142,14 @@ app.post('/api/register', (req, res) => {
     do { id = generateUniqueId(); } while (db.users[id]);
 
     const hash = bcrypt.hashSync(password, 10);
+    const tempToken = generateUniqueId(6);
+    
     db.users[id] = { id, name, password: hash, role: 'student' };
+    db.temp_tokens = db.temp_tokens || {};
+    db.temp_tokens[tempToken] = { userId: id, expiresAt: Date.now() + 60000 };
+    
     saveDB(db);
-    res.status(201).json({ message: 'User registered successfully', id });
+    res.status(201).json({ message: 'User registered successfully', id, tempToken });
 });
 
 // Login
@@ -163,11 +168,27 @@ app.post('/api/login', (req, res) => {
 
     // Check student accounts from JSON db
     const db = loadDB();
-    const user = db.users[id];
-    if (!user) return res.status(401).json({ error: 'Invalid ID or password' });
+    let user = db.users[id];
+    let isTokenLogin = false;
 
-    const isMatch = bcrypt.compareSync(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: 'Invalid ID or password' });
+    // Check if "password" is actually a temporary token
+    if (db.temp_tokens && db.temp_tokens[password]) {
+        const t = db.temp_tokens[password];
+        if (t.expiresAt > Date.now()) {
+            user = db.users[t.userId];
+            isTokenLogin = true;
+            // Optionally delete token after use
+            delete db.temp_tokens[password];
+            saveDB(db);
+        }
+    }
+
+    if (!user) return res.status(401).json({ error: 'Invalid ID, password, or expired token' });
+
+    if (!isTokenLogin) {
+        const isMatch = bcrypt.compareSync(password, user.password);
+        if (!isMatch) return res.status(401).json({ error: 'Invalid ID or password' });
+    }
 
     db.activities.push({ user_id: id, activity: 'Logged in', timestamp: new Date().toISOString() });
     saveDB(db);
