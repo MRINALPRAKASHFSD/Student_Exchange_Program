@@ -88,6 +88,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    window.downloadPhoto = async (url, filename) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
+            showToast(`Downloaded ${filename}`);
+        } catch (err) {
+            console.error('Download failed:', err);
+            // Fallback to simple link if fetch fails
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.target = '_blank';
+            link.click();
+        }
+    };
+
     window.downloadTableAsCSV = (tbodyId, filename) => {
         const tbody = document.getElementById(tbodyId);
         if (!tbody) return showToast('Table data not found', 'error');
@@ -310,18 +334,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Render Photos
                 document.getElementById('admin-photos-grid').innerHTML = data.photos.map(p => `
-                    <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 12px; width: 180px; transition: all 0.3s ease;" class="photo-card">
-                        <a href="/uploads/${p.filename}" download="${p.filename}" style="display:block; text-decoration:none; color:inherit;">
-                            <img src="/uploads/${p.filename}" style="width:100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 0.8rem; cursor: pointer;" title="Click to download">
-                            <div style="font-size:0.85rem; font-weight: 600; color:#fff; margin-bottom: 0.2rem;">${p.name}</div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 12px; width: 180px; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1);" class="photo-card">
+                        <div style="cursor: pointer;" onclick="downloadPhoto('/uploads/${p.filename}', '${p.filename}')">
+                            <img src="/uploads/${p.filename}" style="width:100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 0.8rem;" title="Click to download">
+                            <div style="font-size:0.85rem; font-weight: 600; color:#fff; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
                             <div style="font-size:0.75rem; color:#b0c4de; margin-bottom: 0.8rem; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${p.description || 'No description'}</div>
-                        </a>
-                        <a href="/uploads/${p.filename}" download="${p.filename}" class="btn btn-outline" style="width:100%; display:flex; padding:0.4rem; font-size:0.75rem; text-decoration: none;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            Download
-                        </a>
+                        </div>
+                        <button onclick="downloadPhoto('/uploads/${p.filename}', '${p.filename}')" class="btn btn-outline" style="width:100%; display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.4rem; font-size:0.75rem;">
+                            <i data-lucide="download" style="width:14px; height:14px;"></i> Download
+                        </button>
                     </div>
                 `).join('');
+                lucide.createIcons();
 
                 // Render Ratings
                 document.getElementById('admin-ratings-body').innerHTML = data.ratings.map(r => `
@@ -372,6 +396,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionFilter.appendChild(opt);
                 });
                 sessionFilter.value = currentFilter;
+
+                // Download All Photos logic
+                const downloadAllBtn = document.getElementById('download-all-photos');
+                if (downloadAllBtn) {
+                    downloadAllBtn.onclick = () => {
+                        const photos = data.photos;
+                        if (photos.length === 0) return showToast('No photos to download', 'info');
+                        
+                        showToast(`Starting download of ${photos.length} photos...`);
+                        photos.forEach((p, index) => {
+                            setTimeout(() => {
+                                downloadPhoto(`/uploads/${p.filename}`, p.filename);
+                            }, index * 400); // Stagger by 400ms
+                        });
+                    };
+                }
             }
         } catch (e) {
             console.error('Failed to load admin dashboard', e);

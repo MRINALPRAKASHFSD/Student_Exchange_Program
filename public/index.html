@@ -374,7 +374,12 @@
             </div>
 
             <div class="glass-panel mb-3">
-                <h3>Recent Photos</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0;">Recent Photos</h3>
+                    <button id="download-all-photos" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                        <i data-lucide="download" style="width: 14px; height: 14px; margin-right: 4px;"></i> Download All
+                    </button>
+                </div>
                 <div id="admin-photos-grid" style="display: flex; gap: 1rem; flex-wrap: wrap;"></div>
             </div>
 
