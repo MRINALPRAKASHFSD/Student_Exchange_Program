@@ -79,6 +79,16 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(uploadDir));
 
+// Dedicated route to serve photos from /tmp/uploads on Vercel
+app.get('/uploads/:filename', (req, res) => {
+    const filePath = path.join(uploadDir, req.params.filename);
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send('Photo not found');
+    }
+});
+
 // ─── Multer ───────────────────────────────────────────────────────────────────
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadDir),
