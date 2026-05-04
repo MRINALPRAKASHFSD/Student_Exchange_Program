@@ -157,10 +157,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div style="font-size:1.6rem; font-weight:800; letter-spacing:3px; margin:0.4rem 0; color:#fff;">${data.tempToken}</div>
                             <div id="token-timer" style="font-size:0.75rem; color:#ff4d4d; font-weight:600;">Expires in: 60s</div>
                         </div>
-                        <button type="button" class="btn btn-primary" onclick="copyStudentId('${data.tempToken}'); document.getElementById('login-id').value='${data.id}'; openModal('login');" style="padding: 0.5rem 1rem; font-size: 0.9rem; width:100%;">
-                            Copy & Go to Login
-                        </button>
-                        <small style="opacity:0.6; font-size:0.7rem; margin-top:0.4rem;">Paste the token in the <strong>Password</strong> field. Expiring in 60s.</small>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; width:100%;">
+                            <button type="button" class="btn btn-primary" onclick="copyStudentId('${data.tempToken}'); document.getElementById('login-id').value='${data.id}'; openModal('login');" style="padding: 0.75rem 1rem; font-size: 1rem; width:100%; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                <i data-lucide="log-in" style="width:18px; height:18px;"></i> Copy & Proceed to Login
+                            </button>
+                        </div>
+                        <small style="opacity:0.6; font-size:0.75rem; margin-top:0.4rem;">Paste the token in the <strong>Password</strong> field at the login screen.</small>
                     </div>
                 `, true);
 
