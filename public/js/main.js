@@ -229,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${a.name}</td>
                         <td>${a.student_id}</td>
                         <td>${a.date}</td>
+                        <td>${a.session || 'N/A'}</td>
                         <td>${a.status}</td>
                     </tr>
                 `).join('');
@@ -274,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr>
                         <td>${new Date(a.timestamp).toLocaleString()}</td>
                         <td>${a.name} (${a.student_id})</td>
-                        <td>${a.activity_type}</td>
+                        <td>${a.activity}</td>
                     </tr>
                 `).join('');
             }
@@ -409,19 +410,111 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Session Data
+    const SESSIONS = {
+        "2026-05-04": [
+            "Registration & Welcome Kit Distribution",
+            "Inaugural Session & Program Briefing",
+            "Campus Tour & Lab Visits",
+            "Introduction to Emerging Technologies",
+            "Ice-Breaking & Team Formation",
+            "Reflection & Wrap-up"
+        ],
+        "2026-05-05": [
+            "Basics of Programming & Problem Solving",
+            "Introduction to Git & GitHub",
+            "Hands-on: Creating Repositories",
+            "Version Control & Collaborative Coding"
+        ],
+        "2026-05-06": [
+            "Introduction to Artificial Intelligence",
+            "Hands-on with AI Tools",
+            "Innovation & Idea Development Workshop",
+            "Group Activity: Idea Pitching"
+        ],
+        "2026-05-07": [
+            "Cybersecurity Basics & Safe Internet Practices",
+            "Practical Activities on Digital Safety",
+            "Career Guidance & Industry Readiness",
+            "Resume Building & Interview Preparation"
+        ],
+        "2026-05-08": [
+            "Mini Project (Team-based Activity)",
+            "Project Presentations",
+            "Feedback & Reflection Session",
+            "Certificate Distribution & Valedictory"
+        ]
+    };
+
+    const attDateSelect = document.getElementById('att-date');
+    const attSessionSelect = document.getElementById('att-session');
+    const customSessionGroup = document.getElementById('custom-session-group');
+    const attCustomSessionInput = document.getElementById('att-custom-session');
+
+    const updateSessions = () => {
+        const selectedDate = attDateSelect.value;
+        const sessions = SESSIONS[selectedDate] || [];
+        
+        // Keep "Select a session" and "Other"
+        attSessionSelect.innerHTML = '<option value="" disabled selected>Select a session</option>';
+        
+        sessions.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            attSessionSelect.appendChild(opt);
+        });
+
+        const otherOpt = document.createElement('option');
+        otherOpt.value = "other";
+        otherOpt.textContent = "Other (Manual Entry)";
+        attSessionSelect.appendChild(otherOpt);
+
+        // Hide custom group initially when date changes
+        customSessionGroup.classList.add('hidden');
+        attCustomSessionInput.required = false;
+    };
+
+    attDateSelect?.addEventListener('change', updateSessions);
+    
+    attSessionSelect?.addEventListener('change', () => {
+        if (attSessionSelect.value === 'other') {
+            customSessionGroup.classList.remove('hidden');
+            attCustomSessionInput.required = true;
+        } else {
+            customSessionGroup.classList.add('hidden');
+            attCustomSessionInput.required = false;
+        }
+    });
+
+    // Initialize sessions for the default date
+    if (attDateSelect) updateSessions();
+
     // Form submission handlers for new Student actions
     document.getElementById('attendance-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const date = document.getElementById('att-date').value;
+        const date = attDateSelect.value;
+        let session = attSessionSelect.value;
         const status = document.getElementById('att-status').value;
+
+        if (session === 'other') {
+            session = attCustomSessionInput.value;
+        }
+
+        if (!session) {
+            showToast('Please select or enter a session', 'error');
+            return;
+        }
+
         try {
             await fetch(`${API_URL}/attendance`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ date, status })
+                body: JSON.stringify({ date, session, status })
             });
             showToast('Attendance successfully submitted!');
             e.target.reset();
+            updateSessions(); // Reset dropdowns
         } catch(err) { showToast('Failed to submit attendance', 'error'); }
     });
 

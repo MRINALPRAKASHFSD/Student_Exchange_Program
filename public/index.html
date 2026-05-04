@@ -207,7 +207,25 @@
                         <form id="attendance-form">
                             <div class="form-group">
                                 <label for="att-date">Date</label>
-                                <input type="date" id="att-date" required>
+                                <select id="att-date" required>
+                                    <option value="2026-05-04">Day 1: May 4</option>
+                                    <option value="2026-05-05">Day 2: May 5</option>
+                                    <option value="2026-05-06">Day 3: May 6</option>
+                                    <option value="2026-05-07">Day 4: May 7</option>
+                                    <option value="2026-05-08">Day 5: May 8</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="att-session">Session</label>
+                                <select id="att-session" required>
+                                    <option value="" disabled selected>Select a session</option>
+                                    <!-- Options will be populated via JS -->
+                                    <option value="other">Other (Manual Entry)</option>
+                                </select>
+                            </div>
+                            <div class="form-group hidden" id="custom-session-group">
+                                <label for="att-custom-session">Manual Session Name</label>
+                                <input type="text" id="att-custom-session" placeholder="Enter session name">
                             </div>
                             <div class="form-group">
                                 <label for="att-status">Status</label>
@@ -308,7 +326,7 @@
                 <div class="table-responsive">
                     <table class="admin-table" id="table-attendance">
                         <thead>
-                            <tr><th>Student</th><th>ID</th><th>Date</th><th>Status</th></tr>
+                            <tr><th>Student</th><th>ID</th><th>Date</th><th>Session</th><th>Status</th></tr>
                         </thead>
                         <tbody id="admin-attendance-body"></tbody>
                     </table>

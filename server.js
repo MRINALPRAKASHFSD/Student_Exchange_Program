@@ -183,10 +183,17 @@ app.get('/api/dashboard', authenticateToken, (req, res) => {
 
 // Attendance
 app.post('/api/attendance', authenticateToken, (req, res) => {
-    const { date, status } = req.body;
+    const { date, session, status } = req.body;
     const db = loadDB();
-    db.attendance.push({ id: Date.now(), user_id: req.user.id, date, status, timestamp: new Date().toISOString() });
-    db.activities.push({ user_id: req.user.id, activity: `Logged attendance for ${date}`, timestamp: new Date().toISOString() });
+    db.attendance.push({ 
+        id: Date.now(), 
+        user_id: req.user.id, 
+        date, 
+        session, 
+        status, 
+        timestamp: new Date().toISOString() 
+    });
+    db.activities.push({ user_id: req.user.id, activity: `Logged attendance for ${date} (${session})`, timestamp: new Date().toISOString() });
     saveDB(db);
     res.json({ message: 'Attendance logged successfully' });
 });
