@@ -252,10 +252,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Render Photos
                 document.getElementById('admin-photos-grid').innerHTML = data.photos.map(p => `
-                    <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px; width: 150px;">
-                        <img src="/uploads/${p.filename}" style="width:100%; border-radius:4px; margin-bottom:0.5rem;">
-                        <div style="font-size:0.8rem; color:#b0c4de;">${p.name}</div>
-                        <div style="font-size:0.8rem;">${p.description || 'No desc'}</div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 12px; width: 180px; transition: all 0.3s ease;" class="photo-card">
+                        <a href="/uploads/${p.filename}" download="${p.filename}" style="display:block; text-decoration:none; color:inherit;">
+                            <img src="/uploads/${p.filename}" style="width:100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 0.8rem; cursor: pointer;" title="Click to download">
+                            <div style="font-size:0.85rem; font-weight: 600; color:#fff; margin-bottom: 0.2rem;">${p.name}</div>
+                            <div style="font-size:0.75rem; color:#b0c4de; margin-bottom: 0.8rem; height: 2.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${p.description || 'No description'}</div>
+                        </a>
+                        <a href="/uploads/${p.filename}" download="${p.filename}" class="btn btn-outline" style="width:100%; display:flex; padding:0.4rem; font-size:0.75rem; text-decoration: none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Download
+                        </a>
                     </div>
                 `).join('');
 
