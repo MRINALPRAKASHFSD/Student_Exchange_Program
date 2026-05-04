@@ -158,7 +158,8 @@ app.post('/api/login', (req, res) => {
     if (!id || !password) return res.status(400).json({ error: 'ID and password are required' });
 
     // Check hardcoded admins first (works even if /tmp is wiped)
-    const adminUser = ADMIN_ACCOUNTS[id];
+    const adminId = typeof id === 'string' ? id.toLowerCase() : id;
+    const adminUser = ADMIN_ACCOUNTS[adminId];
     if (adminUser) {
         const isMatch = bcrypt.compareSync(password, adminUser.password);
         if (!isMatch) return res.status(401).json({ error: 'Invalid ID or password' });
