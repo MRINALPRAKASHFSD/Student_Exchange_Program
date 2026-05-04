@@ -250,8 +250,10 @@ app.get('/api/admin/backup', authenticateAdmin, (req, res) => {
     res.send(JSON.stringify(db, null, 2));
 });
 
-// SPA Support
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+// SPA Support - Catch-all fallback
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 if (!isVercel) app.listen(PORT, () => console.log(`Server on ${PORT}`));
