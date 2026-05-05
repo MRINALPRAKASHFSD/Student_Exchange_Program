@@ -250,8 +250,12 @@ app.get('/api/admin/backup', authenticateAdmin, (req, res) => {
     res.send(JSON.stringify(db, null, 2));
 });
 
-// SPA Support - Catch-all fallback
-app.use((req, res) => {
+// SPA Support - Catch-all fallback (only for page navigations)
+app.use((req, res, next) => {
+    // If it's an API request or has a file extension, don't serve index.html
+    if (req.url.startsWith('/api') || req.url.startsWith('/uploads') || path.extname(req.url)) {
+        return next();
+    }
     res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
